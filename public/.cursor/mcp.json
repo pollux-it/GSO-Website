@@ -1,0 +1,44 @@
+{
+    "mcpServers": {
+      "supabase": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@supabase/mcp-server-supabase@dev",
+          "--access-token",
+          "sbp_9864ec2e2b2bbc12fa9347af5504e88a63ffc35f"
+        ]
+      },
+      "supabase Project Managed": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-postgres",
+          "postgresql://postgres:password@localhost:54322/postgres"
+        ]
+      },
+      "desktop-commander": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@smithery/cli@latest",
+          "run",
+          "@wonderwhy-er/desktop-commander",
+          "--key",
+          "12ab97e6-6b44-4012-81e9-7ce02b87f2df"
+        ]
+      },
+      "browser-tools": {
+        "command": "npx",
+        "args": [
+          "@agentdeskai/browser-tools-mcp"
+        ]
+      }
+    }
+  } 
