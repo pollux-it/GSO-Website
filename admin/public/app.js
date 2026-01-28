@@ -54,7 +54,14 @@ function setupFormHandler() {
             
             if (response.ok) {
                 const action = editMode ? 'updated' : 'generated';
-                showToast(`Certificate ${formData.ccrNumber} ${action} successfully! (EN + AR)`, 'success');
+                
+                if (result.warning) {
+                    showToast(`Certificate ${action}, but check warnings: ${result.warning}`, 'warning');
+                    alert(`Warning: ${result.warning}`);
+                } else {
+                    showToast(`Certificate ${formData.ccrNumber} ${action} successfully! (EN + AR)`, 'success');
+                }
+                
                 loadCertificates();
                 
                 // Reset form if in edit mode

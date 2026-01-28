@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -40,9 +40,16 @@
             <div class="card-header">
               <div class="d-flex justify-content-between align-items-center">
                 <h4>
-                  <i class="fa fa-plus-circle mr-2"></i><span id="formTitle">Add New Vehicle Certificate</span>
+                  <i class="fa fa-plus-circle mr-2"></i
+                  ><span id="formTitle">Add New Vehicle Certificate</span>
                 </h4>
-                <button type="button" class="btn btn-sm btn-light" id="cancelEditBtn" style="display: none;" onclick="cancelEdit()">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-light"
+                  id="cancelEditBtn"
+                  style="display: none"
+                  onclick="cancelEdit()"
+                >
                   <i class="fa fa-times mr-1"></i>Cancel Edit
                 </button>
               </div>
@@ -63,7 +70,7 @@
                           class="form-control"
                           id="ccrNumber"
                           required
-                          placeholder="e.g. 546883"
+                          placeholder="e.g. 567628"
                         />
                       </div>
                     </div>
@@ -75,7 +82,7 @@
                           class="form-control"
                           id="approvedOn"
                           required
-                          placeholder="e.g. 16 APR 2025"
+                          placeholder="e.g. 16 JUL 2025"
                         />
                       </div>
                     </div>
@@ -87,7 +94,7 @@
                           class="form-control"
                           id="manufacturer"
                           required
-                          placeholder="e.g. Toyota Motor Corporation"
+                          placeholder="e.g. FCA US LLC"
                         />
                       </div>
                     </div>
@@ -101,7 +108,7 @@
                       class="form-control"
                       id="vehicleDescription"
                       required
-                      placeholder="e.g. TOYOTA HIACE (GDH322) 2.8L Van RWD 5Doors"
+                      placeholder="e.g. RAM 1500 SST Rebel X 3.0L Pick-up 4×4 4Doors"
                     />
                   </div>
                 </div>
@@ -116,8 +123,8 @@
                       <div class="form-group">
                         <label for="category">Category</label>
                         <select class="form-control" id="category">
-                          <option value="Passenger Car">Passenger Car</option>
                           <option value="Truck">Truck</option>
+                          <option value="Passenger Car">Passenger Car</option>
                           <option value="SUV">SUV</option>
                           <option value="Van">Van</option>
                           <option value="Motorcycle">Motorcycle</option>
@@ -132,7 +139,7 @@
                           type="number"
                           class="form-control"
                           id="modelYear"
-                          placeholder="e.g. 2026"
+                          placeholder="e.g. 2025"
                         />
                       </div>
                     </div>
@@ -145,7 +152,7 @@
                           type="text"
                           class="form-control"
                           id="countryOfProduction"
-                          placeholder="e.g. JAPAN"
+                          placeholder="e.g. CANADA"
                         />
                       </div>
                     </div>
@@ -160,7 +167,7 @@
                           id="productionMonth"
                           min="1"
                           max="12"
-                          placeholder="1-12"
+                          placeholder="07"
                         />
                       </div>
                     </div>
@@ -182,7 +189,7 @@
                           type="text"
                           class="form-control"
                           id="vin"
-                          placeholder="e.g. JTGHB9CP*T*******"
+                          placeholder="e.g. 1C6SRFHT..."
                         />
                       </div>
                     </div>
@@ -202,7 +209,7 @@
                           type="number"
                           class="form-control"
                           id="maxVehicleWeight"
-                          placeholder="e.g. 3500"
+                          placeholder="e.g. 3450"
                         />
                       </div>
                     </div>
@@ -213,7 +220,7 @@
                           type="number"
                           class="form-control"
                           id="curbWeight"
-                          placeholder="e.g. 2340"
+                          placeholder="e.g. 2550"
                         />
                       </div>
                     </div>
@@ -235,7 +242,7 @@
                           type="number"
                           class="form-control"
                           id="rearAxleWeight"
-                          placeholder="e.g. 2000"
+                          placeholder="e.g. 1900"
                         />
                       </div>
                     </div>
@@ -255,7 +262,7 @@
                           type="number"
                           class="form-control"
                           id="length"
-                          placeholder="e.g. 5915"
+                          placeholder="e.g. 5916"
                         />
                       </div>
                     </div>
@@ -266,7 +273,7 @@
                           type="number"
                           class="form-control"
                           id="width"
-                          placeholder="e.g. 1950"
+                          placeholder="e.g. 2085"
                         />
                       </div>
                     </div>
@@ -277,7 +284,7 @@
                           type="number"
                           class="form-control"
                           id="height"
-                          placeholder="e.g. 2280"
+                          placeholder="e.g. 1960"
                         />
                       </div>
                     </div>
@@ -288,7 +295,7 @@
                           type="number"
                           class="form-control"
                           id="wheelbase"
-                          placeholder="e.g. 3860"
+                          placeholder="e.g. 3692"
                         />
                       </div>
                     </div>
@@ -301,7 +308,7 @@
                           type="number"
                           class="form-control"
                           id="trackFront"
-                          placeholder="e.g. 1680"
+                          placeholder="e.g. 1740"
                         />
                       </div>
                     </div>
@@ -312,7 +319,7 @@
                           type="number"
                           class="form-control"
                           id="trackRear"
-                          placeholder="e.g. 1670"
+                          placeholder="e.g. 1740"
                         />
                       </div>
                     </div>
@@ -331,8 +338,8 @@
                           >Type of Chassis and Body</label
                         >
                         <select class="form-control" id="chassisType">
-                          <option value="Monocoque">Monocoque</option>
                           <option value="Body-on-frame">Body-on-frame</option>
+                          <option value="Monocoque">Monocoque</option>
                           <option value="Space frame">Space frame</option>
                           <option value="Backbone">Backbone</option>
                         </select>
@@ -348,7 +355,7 @@
                           class="form-control"
                           id="passengers"
                           min="1"
-                          placeholder="e.g. 3"
+                          placeholder="e.g. 5"
                         />
                       </div>
                     </div>
@@ -380,7 +387,7 @@
                           type="number"
                           class="form-control"
                           id="cylinders"
-                          placeholder="e.g. 4"
+                          placeholder="e.g. 6"
                         />
                       </div>
                     </div>
@@ -392,7 +399,7 @@
                           step="any"
                           class="form-control"
                           id="displacement"
-                          placeholder="e.g. 2755 or 1.75"
+                          placeholder="e.g. 2993"
                         />
                       </div>
                     </div>
@@ -402,12 +409,12 @@
                       <div class="form-group">
                         <label for="airIntake">Air Intake</label>
                         <select class="form-control" id="airIntake">
+                          <option value="Twin Turbo">Twin Turbo</option>
                           <option value="Naturally Aspirated">
                             Naturally Aspirated
                           </option>
                           <option value="Turbo">Turbo</option>
                           <option value="Supercharged">Supercharged</option>
-                          <option value="Twin Turbo">Twin Turbo</option>
                         </select>
                       </div>
                     </div>
@@ -418,7 +425,7 @@
                           type="number"
                           class="form-control"
                           id="enginePower"
-                          placeholder="e.g. 130"
+                          placeholder="e.g. 313"
                         />
                       </div>
                     </div>
@@ -429,7 +436,7 @@
                           type="number"
                           class="form-control"
                           id="engineRpm"
-                          placeholder="e.g. 3400"
+                          placeholder="e.g. 5200"
                         />
                       </div>
                     </div>
@@ -537,7 +544,7 @@
                           step="0.1"
                           class="form-control"
                           id="fuelEconomy"
-                          placeholder="e.g. 13.7"
+                          placeholder="e.g. 09.5"
                         />
                       </div>
                     </div>
@@ -545,11 +552,11 @@
                       <div class="form-group">
                         <label for="fuelEconomyRating">Rating</label>
                         <select class="form-control" id="fuelEconomyRating">
+                          <option value="Poor">Poor</option>
                           <option value="Excellent">Excellent</option>
                           <option value="Very Good">Very Good</option>
                           <option value="Good">Good</option>
                           <option value="Average">Average</option>
-                          <option value="Poor">Poor</option>
                         </select>
                       </div>
                     </div>
@@ -567,7 +574,7 @@
                       class="form-control"
                       id="additionalInfo"
                       rows="3"
-                      placeholder="Any additional information or local standards to be complied..."
+                      placeholder="Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2025 MY-D3, when exporting to those countries."
                     ></textarea>
                   </div>
                 </div>
@@ -600,7 +607,7 @@
                   class="form-control"
                   id="searchCcr"
                   placeholder="Enter CCR Number..."
-                  onkeypress="if(event.key === 'Enter') searchCertificate()"
+                  onkeypress="if (event.key === 'Enter') searchCertificate();"
                 />
                 <div class="input-group-append">
                   <button
@@ -612,7 +619,7 @@
                   </button>
                 </div>
               </div>
-              <div id="searchResult" class="mt-3" style="display: none;">
+              <div id="searchResult" class="mt-3" style="display: none">
                 <div class="alert alert-info">
                   <strong id="searchResultText"></strong>
                 </div>
@@ -620,7 +627,7 @@
                   class="btn btn-warning btn-block"
                   id="loadEditBtn"
                   onclick="loadCertificateForEdit()"
-                  style="display: none;"
+                  style="display: none"
                 >
                   <i class="fa fa-edit mr-2"></i>Load for Editing
                 </button>

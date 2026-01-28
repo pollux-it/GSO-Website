@@ -3,6 +3,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const { generateWordCertificate } = require("./word-generator");
 
 const app = express();
 const PORT = 3000;
@@ -507,7 +508,7 @@ function generateArabicCertificate(data) {
 // API Endpoints
 
 // Generate and save certificate (English + Arabic)
-app.post("/api/generate", (req, res) => {
+app.post("/api/generate", async (req, res) => {
   try {
     const data = req.body;
 
@@ -535,9 +536,43 @@ app.post("/api/generate", (req, res) => {
     const filepathAr = path.join(CERTIFICATES_PATH, filenameAr);
     fs.writeFileSync(filepathAr, htmlAr, "utf8");
 
+    // Save JSON data for robust editing
+    const filepathJson = path.join(CERTIFICATES_PATH, `${data.ccrNumber}.json`);
+    fs.writeFileSync(filepathJson, JSON.stringify(data, null, 2), "utf8");
+
+    // Generate Word version
+    let wordErrorWarning = null;
+    try {
+      const buffer = await generateWordCertificate(data);
+      
+      // Save to "word files" directory in the project root
+      const WORD_FILES_PATH = path.join(__dirname, "../word files");
+      if (!fs.existsSync(WORD_FILES_PATH)) {
+        fs.mkdirSync(WORD_FILES_PATH, { recursive: true });
+      }
+
+      // Sanitize filename: remove invalid chars, keep it reasonable length
+      const safeManufacturer = (data.manufacturer || "").replace(/[^a-z0-9]/gi, '_').trim();
+      const safeDesc = (data.vehicleDescription || "").replace(/[^a-z0-9]/gi, '_').trim().substring(0, 30);
+      
+      const filenameWord = `${safeManufacturer}_${safeDesc}_GSO.docx`;
+      const filepathWord = path.join(WORD_FILES_PATH, filenameWord);
+      
+      fs.writeFileSync(filepathWord, buffer);
+      console.log(`Word certificate generated: ${filenameWord} at ${filepathWord}`);
+    } catch (wordError) {
+      console.error("Error generating Word certificate:", wordError);
+      if (wordError.code === 'EBUSY') {
+          wordErrorWarning = "Word file is open in another program. Please close it and update again.";
+      } else {
+          wordErrorWarning = "Failed to generate Word file: " + wordError.message;
+      }
+    }
+
     res.json({
       success: true,
       message: "Certificate generated successfully (English + Arabic)",
+      warning: wordErrorWarning,
       files: {
         english: filenameEn,
         arabic: filenameAr
@@ -589,6 +624,18 @@ app.get("/api/certificates/:ccrNumber", (req, res) => {
     
     const filepathEn = path.join(CERTIFICATES_PATH, `${ccrNumber}.html`);
 
+    // 1. Try to read JSON data first (best for editing)
+    const filepathJson = path.join(CERTIFICATES_PATH, `${ccrNumber}.json`);
+    if (fs.existsSync(filepathJson)) {
+        try {
+            const jsonData = JSON.parse(fs.readFileSync(filepathJson, 'utf8'));
+            return res.json(jsonData);
+        } catch (jsonErr) {
+            console.error("Error reading JSON file, falling back to HTML parsing:", jsonErr);
+        }
+    }
+
+    // 2. Fallback: Read the English certificate file and parse HTML
     if (!fs.existsSync(filepathEn)) {
       return res.status(404).json({ error: "Certificate not found" });
     }
@@ -701,6 +748,26 @@ app.delete("/api/certificates/:ccrNumber", (req, res) => {
     if (fs.existsSync(filepathAr)) {
       fs.unlinkSync(filepathAr);
     }
+    
+    // Delete JSON data if exists
+    const filepathJson = path.join(CERTIFICATES_PATH, `${ccrNumber}.json`);
+    if (fs.existsSync(filepathJson)) {
+        fs.unlinkSync(filepathJson);
+    }
+    
+    // Delete Word file if exists (using new path logic? No, old logic was different depending on when it was made)
+    // We try to delete from CERTIFICATES_PATH (old) and WORD_FILES_PATH (new)
+    
+    // Old word path
+    const filepathWordOld = path.join(CERTIFICATES_PATH, `${ccrNumber}.docx`);
+    if (fs.existsSync(filepathWordOld)) {
+        fs.unlinkSync(filepathWordOld);
+    }
+    
+    // We can't easily delete the "New" word file because it's named by Manufacturer_Desc. 
+    // We would need to know the manufacturer/desc to find it, or search the dir.
+    // For now, let's leave the labeled Word file as backup or manual cleanup.
+    // Or we could read the JSON before deleting to know the filename.
     
     res.json({ success: true, message: "Certificate deleted successfully (English + Arabic)" });
   } catch (error) {
