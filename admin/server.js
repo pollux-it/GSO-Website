@@ -3,6 +3,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const { exec } = require("child_process");
 const { generateWordCertificate } = require("./word-generator");
 
 const app = express();
@@ -617,6 +618,11 @@ app.get("/api/certificates/:ccrNumber", (req, res) => {
   try {
     const { ccrNumber } = req.params;
     
+    // Security: Validate CCR number format (alphanumeric only, no path traversal)
+    if (!/^[a-zA-Z0-9]+$/.test(ccrNumber)) {
+      return res.status(400).json({ error: "Invalid CCR number format" });
+    }
+    
     // Protect template files
     if (ccrNumber === "546883") {
       return res.status(400).json({ error: "Cannot read template file" });
@@ -729,6 +735,11 @@ app.delete("/api/certificates/:ccrNumber", (req, res) => {
   try {
     const { ccrNumber } = req.params;
     
+    // Security: Validate CCR number format (alphanumeric only, no path traversal)
+    if (!/^[a-zA-Z0-9]+$/.test(ccrNumber)) {
+      return res.status(400).json({ error: "Invalid CCR number format" });
+    }
+    
     // Protect template files
     if (ccrNumber === "546883") {
       return res.status(400).json({ error: "Cannot delete template file" });
@@ -776,9 +787,20 @@ app.delete("/api/certificates/:ccrNumber", (req, res) => {
   }
 });
 
-// Deploy to Firebase
+// Deploy to Firebase (localhost only for security)
 app.post("/api/deploy", (req, res) => {
-  const { exec } = require('child_process');
+  // Security: Only allow deployment from localhost
+  const clientIP = req.ip || req.connection.remoteAddress;
+  const isLocalhost = clientIP === '127.0.0.1' || clientIP === '::1' || clientIP === '::ffff:127.0.0.1';
+  
+  if (!isLocalhost) {
+    console.warn(`Deploy attempt blocked from non-localhost IP: ${clientIP}`);
+    return res.status(403).json({ 
+      success: false, 
+      error: "Deploy is only allowed from localhost for security reasons" 
+    });
+  }
+  
   const publicPath = path.join(__dirname, "..", "public");
   
   console.log("Starting Firebase deployment...");

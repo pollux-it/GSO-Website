@@ -5,6 +5,17 @@ const path = require("path");
 
 function generateWordCertificate(data) {
     try {
+        // Validate required data fields
+        if (!data || typeof data !== 'object') {
+            throw new Error("Invalid data: expected an object with certificate data");
+        }
+        
+        const requiredFields = ['ccrNumber', 'manufacturer', 'vehicleDescription'];
+        const missingFields = requiredFields.filter(field => !data[field]);
+        if (missingFields.length > 0) {
+            throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+        }
+
         // Load the template
         const templatePath = path.join(__dirname, "templates", "certificate-template.docx");
         

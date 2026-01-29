@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="GSO Vehicle Entry System - Admin Panel for managing vehicle conformity certificates" />
+    <meta name="theme-color" content="#0066cc" />
     <title>GSO Vehicle Entry System - Admin Panel</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Stylesheets -->
     <link
       rel="stylesheet"
       href="https://static.gso.org.sa/frameworks/bootstrap/4.0.0/bootstrap.min.css"
@@ -39,9 +46,8 @@
           <div class="card form-card">
             <div class="card-header">
               <div class="d-flex justify-content-between align-items-center">
-                <h4>
-                  <i class="fa fa-plus-circle mr-2"></i
-                  ><span id="formTitle">Add New Vehicle Certificate</span>
+                <h4 id="formTitle">
+                  <i class="fa fa-plus-circle mr-2"></i>Add New Vehicle Certificate
                 </h4>
                 <button
                   type="button"
@@ -505,7 +511,7 @@
                         <label for="emergencyBrakes">Emergency Brakes</label>
                         <select class="form-control" id="emergencyBrakes">
                           <option value="Combined with the service brake">
-                            Combined with service brake
+                            Combined with the service brake
                           </option>
                           <option value="Separate system">
                             Separate system
@@ -552,11 +558,11 @@
                       <div class="form-group">
                         <label for="fuelEconomyRating">Rating</label>
                         <select class="form-control" id="fuelEconomyRating">
-                          <option value="Poor">Poor</option>
                           <option value="Excellent">Excellent</option>
                           <option value="Very Good">Very Good</option>
                           <option value="Good">Good</option>
                           <option value="Average">Average</option>
+                          <option value="Poor">Poor</option>
                         </select>
                       </div>
                     </div>

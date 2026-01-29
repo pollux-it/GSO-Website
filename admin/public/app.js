@@ -87,9 +87,9 @@ Click Cancel to preview Arabic version (Local)`);
                 
                 // Ask if user wants to open deployed version
                 setTimeout(() => {
-                    const openDeployed = confirm(`Would you like to open the deployed version?\n\nClick OK for English\nClick Cancel for Arabic\n\n(Note: Only works if already deployed)`);
-                    if (openDeployed !== null) {
-                        openDeployedCertificate(formData.ccrNumber, !openDeployed);
+                    if (confirm(`Would you like to open the deployed version?\n\n(Note: Only works if already deployed)`)) {
+                        const isArabic = !confirm(`Click OK for English version\nClick Cancel for Arabic version`);
+                        openDeployedCertificate(formData.ccrNumber, isArabic);
                     }
                 }, 500);
             } else {
@@ -172,9 +172,21 @@ async function loadCertificates() {
     
     try {
         const response = await fetch(`${API_BASE}/certificates`);
-        const certificates = await response.json();
         
-        if (certificates.length === 0) {
+        // Handle non-OK responses
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+        
+        let certificates;
+        try {
+            certificates = await response.json();
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            throw new Error('Invalid response from server');
+        }
+        
+        if (!Array.isArray(certificates) || certificates.length === 0) {
             listContainer.html(`
                 <div class="empty-state">
                     <i class="fa fa-folder-open-o"></i>
@@ -287,9 +299,15 @@ function formatDate(dateStr) {
 // Show toast notification
 function showToast(message, type = 'success') {
     const toast = $('#toast');
-    toast.removeClass('success error').addClass(type);
+    toast.removeClass('success error warning').addClass(type);
+    
+    // Determine icon based on type
+    let icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'warning') icon = 'fa-exclamation-triangle';
+    
     toast.find('.toast-body').html(`
-        <i class="fa ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+        <i class="fa ${icon} mr-2"></i>
         ${message}
     `);
     toast.addClass('show');
@@ -341,32 +359,32 @@ async function deployToFirebase() {
         
         const result = await response.json();
         
-            if (response.ok) {
-                deployMessage.html('<i class="fa fa-check-circle mr-2"></i>Deployment successful!');
-                deployStatus.find('.alert').removeClass('alert-info').addClass('alert-success');
-                showToast('Firebase deployment completed successfully!', 'success');
-                
-                // Show hosting URL if available
-                if (result.output && result.output.includes('Hosting URL:')) {
-                    const urlMatch = result.output.match(/Hosting URL: (https:\/\/[^\s]+)/);
-                    if (urlMatch) {
-                        setTimeout(() => {
-                            if (confirm(`Deployment successful!\n\nLive URL: ${urlMatch[1]}\n\nWould you like to open it?`)) {
-                                window.open(urlMatch[1], '_blank');
-                            }
-                        }, 500);
-                    }
+        if (response.ok) {
+            deployMessage.html('<i class="fa fa-check-circle mr-2"></i>Deployment successful!');
+            deployStatus.find('.alert').removeClass('alert-info').addClass('alert-success');
+            showToast('Firebase deployment completed successfully!', 'success');
+            
+            // Show hosting URL if available
+            if (result.output && result.output.includes('Hosting URL:')) {
+                const urlMatch = result.output.match(/Hosting URL: (https:\/\/[^\s]+)/);
+                if (urlMatch) {
+                    setTimeout(() => {
+                        if (confirm(`Deployment successful!\n\nLive URL: ${urlMatch[1]}\n\nWould you like to open it?`)) {
+                            window.open(urlMatch[1], '_blank');
+                        }
+                    }, 500);
                 }
-                
-                // Ask if user wants to open a specific certificate
-                setTimeout(() => {
-                    const ccrNumber = prompt('Deployment successful!\n\nEnter a CCR number to open the deployed certificate (or click Cancel):');
-                    if (ccrNumber && ccrNumber.trim()) {
-                        const choice = confirm(`Open certificate #${ccrNumber.trim()}?\n\nClick OK for English version\nClick Cancel for Arabic version`);
-                        openDeployedCertificate(ccrNumber.trim(), !choice);
-                    }
-                }, 1000);
-            } else {
+            }
+            
+            // Ask if user wants to open a specific certificate
+            setTimeout(() => {
+                const ccrNumber = prompt('Deployment successful!\n\nEnter a CCR number to open the deployed certificate (or click Cancel):');
+                if (ccrNumber && ccrNumber.trim()) {
+                    const choice = confirm(`Open certificate #${ccrNumber.trim()}?\n\nClick OK for English version\nClick Cancel for Arabic version`);
+                    openDeployedCertificate(ccrNumber.trim(), !choice);
+                }
+            }, 1000);
+        } else {
             deployMessage.html(`<i class="fa fa-exclamation-circle mr-2"></i>Deployment failed: ${result.error}`);
             deployStatus.find('.alert').removeClass('alert-info').addClass('alert-danger');
             showToast('Deployment failed. Check console for details.', 'error');
