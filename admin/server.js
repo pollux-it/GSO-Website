@@ -44,6 +44,7 @@ const translations = {
     'Truck': 'شاحنة',
     'SUV': 'سيارة دفع رباعي',
     'Van': 'فان',
+    'Multipurpose Vehicle': 'مركبة متعددة الأغراض',
     'Motorcycle': 'دراجة نارية',
     'Bus': 'حافلة'
   },
@@ -88,6 +89,7 @@ const translations = {
     'Excellent': 'ممتاز',
     'Very Good': 'جيد جداً',
     'Good': 'جيد',
+    'Acceptable': 'مقبول',
     'Average': 'متوسط',
     'Poor': 'ضعيف'
   },
@@ -95,6 +97,7 @@ const translations = {
     'Light Truck': 'شاحنة خفيفة',
     'Passenger Car': 'سيارة ركاب',
     'SUV': 'سيارة رياضية',
+    'Multipurpose Vehicle': 'مركبة متعددة الأغراض',
     'Heavy Truck': 'شاحنة ثقيلة'
   },
   eCallSystem: {
