@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSO Conformity Certificate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .actions-bar {
+            max-width: 850px;
+            margin: 0 auto 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-print {
+            background: white;
+            color: #667eea;
+        }
+        
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .a4-paper {
+            background: white;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 50px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(0, 0, 0, 0.03);
+            font-weight: 700;
+            letter-spacing: 10px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        
+        .header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #1a365d;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            font-size: 26px;
+            color: #1a365d;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+        
+        .header h2 {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .status::before {
+            content: '✓';
+            font-size: 16px;
+        }
+        
+        .section-title {
+            background: #1a365d;
+            color: white;
+            padding: 10px 15px;
+            font-weight: 600;
+            margin-top: 25px;
+            margin-bottom: 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .row {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 15px;
+            background: white;
+            transition: background 0.2s;
+        }
+        
+        .row:hover {
+            background: #f8fafc;
+        }
+        
+        .row:nth-child(even) {
+            background: #f7fafc;
+        }
+        
+        .row:nth-child(even):hover {
+            background: #edf2f7;
+        }
+        
+        .label {
+            width: 40%;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 13px;
+        }
+        
+        .value {
+            width: 60%;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-weight: 500;
+            color: #1a202c;
+            font-size: 13px;
+        }
+        
+        .vehicle-name-box {
+            background: linear-gradient(135deg, #f6f8fc 0%, #eef1f8 100%);
+            padding: 20px;
+            margin: 0;
+            border-left: 4px solid #1a365d;
+        }
+        
+        .vehicle-name-box .vehicle-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1a365d;
+            line-height: 1.4;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .grid-2 > div {
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .grid-2 > div:last-child {
+            border-right: none;
+        }
+        
+        .vin-row {
+            background: #fffbeb !important;
+            border: 2px solid #f59e0b;
+        }
+        
+        .vin-row .value {
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: #92400e;
+        }
+        
+        .spec-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 15px;
+            background: #edf2f7;
+            border-bottom: 2px solid #cbd5e0;
+            margin-top: 15px;
+        }
+        
+        .note {
+            font-size: 12px;
+            color: #718096;
+            font-style: italic;
+            padding: 10px 15px;
+            background: #f0fff4;
+            border-left: 3px solid #48bb78;
+            margin: 10px 15px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            border-top: 3px solid #1a365d;
+            padding-top: 20px;
+            text-align: center;
+        }
+        
+        .footer p {
+            font-size: 11px;
+            color: #718096;
+            line-height: 1.8;
+        }
+        
+        .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #a0aec0;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .actions-bar {
+                display: none;
+            }
+            
+            .a4-paper {
+                box-shadow: none;
+                max-width: 100%;
+                padding: 20mm;
+            }
+            
+            .row:hover, .row:nth-child(even):hover {
+                background: inherit;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .a4-paper {
+                padding: 20px;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 > div {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .label, .value {
+                width: 100%;
+            }
+            
+            .row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="actions-bar">
+    <a href="/" class="action-btn btn-back">← Generate Another</a>
+    <button class="action-btn btn-print" onclick="window.print()">🖨️ Print / Save PDF</button>
+</div>
+
+<div class="a4-paper">
+    <div class="watermark">GSO</div>
+    
+    <div class="header">
+        <h1>GSO Conformity Certificate</h1>
+        <h2>Gulf Cooperation Council Standardization Organization</h2>
+        <div class="status">This certificate has been approved</div>
+    </div>
+
+    <div class="row">
+        <div class="label">CCR Number</div>
+        <div class="value">{{ data.ccr_number }}</div>
+    </div>
+    <div class="row">
+        <div class="label">Approved On</div>
+        <div class="value">{{ data.approved_on }}</div>
+    </div>
+    <div class="row">
+        <div class="label">Manufacturer</div>
+        <div class="value">{{ data.manufacturer }}</div>
+    </div>
+    
+    <div class="section-title">Motor Vehicle Information</div>
+    <div class="vehicle-name-box">
+        <div class="vehicle-title">{{ data.vehicle_name }}</div>
+    </div>
+    
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">Category</div><div class="value">{{ data.category }}</div></div>
+            <div class="row"><div class="label">Model Year</div><div class="value">{{ data.model_year }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Country of Origin</div><div class="value">{{ data.country }}</div></div>
+            <div class="row"><div class="label">Production Date</div><div class="value">{{ data.production_date }}</div></div>
+        </div>
+    </div>
+    
+    <div class="row vin-row">
+        <div class="label">🔑 VIN</div>
+        <div class="value">{{ data.vin }}</div>
+    </div>
+
+    <div class="section-title">Technical Specifications</div>
+    
+    <div class="spec-header">⚖️ Weights & Load Capacity</div>
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">Max Vehicle Weight</div><div class="value">{{ data.weight_max }}</div></div>
+            <div class="row"><div class="label">Curb Weight</div><div class="value">{{ data.weight_curb }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Max Axle Load (Front)</div><div class="value">{{ data.axle_front }}</div></div>
+            <div class="row"><div class="label">Max Axle Load (Rear)</div><div class="value">{{ data.axle_rear }}</div></div>
+        </div>
+    </div>
+
+    <div class="spec-header">📐 Dimensions</div>
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">Length</div><div class="value">{{ data.dim_length }}</div></div>
+            <div class="row"><div class="label">Width</div><div class="value">{{ data.dim_width }}</div></div>
+            <div class="row"><div class="label">Height</div><div class="value">{{ data.dim_height }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Wheelbase</div><div class="value">{{ data.wheelbase }}</div></div>
+            <div class="row"><div class="label">Track (Front)</div><div class="value">{{ data.track_front }}</div></div>
+            <div class="row"><div class="label">Track (Rear)</div><div class="value">{{ data.track_rear }}</div></div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="label">Chassis Type</div>
+        <div class="value">{{ data.chassis_type }}</div>
+    </div>
+    <div class="row">
+        <div class="label">Seating Capacity</div>
+        <div class="value">{{ data.passengers }}</div>
+    </div>
+
+    <div class="spec-header">🔧 Engine & Performance</div>
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">Engine Type</div><div class="value">{{ data.engine_type }} ({{ data.cylinders }} Cylinders)</div></div>
+            <div class="row"><div class="label">Displacement</div><div class="value">{{ data.displacement }}</div></div>
+            <div class="row"><div class="label">Air Intake</div><div class="value">{{ data.air_intake }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Net Power</div><div class="value">{{ data.power }}</div></div>
+            <div class="row"><div class="label">Max Torque</div><div class="value">{{ data.torque }}</div></div>
+            <div class="row"><div class="label">Pollutant Limit</div><div class="value">{{ data.pollutant_limit }}</div></div>
+        </div>
+    </div>
+    <div class="note">{{ data.extra_notes }}</div>
+
+    <div class="spec-header">⚙️ Transmission & Drivetrain</div>
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">Transmission</div><div class="value">{{ data.transmission }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Drive Type</div><div class="value">{{ data.drive_type }}</div></div>
+        </div>
+    </div>
+
+    <div class="spec-header">🛡️ Safety & Braking System</div>
+    <div class="grid-2">
+        <div>
+            <div class="row"><div class="label">e-Call (Emergency SOS)</div><div class="value">{{ data.ecall }}</div></div>
+            <div class="row"><div class="label">Service Brakes</div><div class="value">{{ data.brakes_service }}</div></div>
+        </div>
+        <div>
+            <div class="row"><div class="label">Emergency Brakes</div><div class="value">{{ data.brakes_emergency }}</div></div>
+            <div class="row"><div class="label">Fuel Tank Capacity</div><div class="value">{{ data.fuel_tank }}</div></div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="label">CAFE Combined Fuel Economy</div>
+        <div class="value">{{ data.cafe_combined }}</div>
+    </div>
+
+    <div class="footer">
+        <div class="qr-placeholder">QR Code</div>
+        <p>
+            This vehicle complies with the National regulations for GCC member countries<br>
+            as mentioned in the Annex of the list of Technical Regulations for Motor Vehicles.<br><br>
+            <strong>Generated with AI assistance • For reference purposes only</strong>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
