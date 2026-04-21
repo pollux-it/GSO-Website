@@ -17,6 +17,7 @@ $(document).ready(function() {
     setDefaultValues();
     setupVinMasking();
     setupSearchInput();
+    loadLogos();
 });
 
 // Generate a random 6-digit CCR number
@@ -171,6 +172,7 @@ function collectFormData() {
         ccrNumber: $('#ccrNumber').val().trim(),
         approvedOn: $('#approvedOn').val().trim(),
         manufacturer: $('#manufacturer').val().trim(),
+        carLogo: $('#carLogo').val(),
         vehicleDescription: $('#vehicleDescription').val().trim(),
         
         // Classification
@@ -282,15 +284,16 @@ function renderCertificatesList(certificates, container) {
     
     const html = certificates.map(cert => {
         const carLabel = cert.vehicleDescription 
-            ? `<span class="certificate-car-name">${cert.vehicleDescription}</span>` 
-            : '';
-        
-        return `
-            <div class="certificate-item" data-ccr="${cert.ccrNumber}">
-                <div class="certificate-info">
-                    <div class="certificate-ccr">#${cert.ccrNumber} ${carLabel}</div>
-                    <div class="certificate-date">${formatDate(cert.modifiedAt)}</div>
-                </div>
+        ? `<div class="certificate-car-name" title="${cert.vehicleDescription}">${cert.vehicleDescription}</div>` 
+        : '';
+    
+    return `
+        <div class="certificate-item" data-ccr="${cert.ccrNumber}">
+            <div class="certificate-info">
+                <div class="certificate-ccr">#${cert.ccrNumber}</div>
+                ${carLabel}
+                <div class="certificate-date">${formatDate(cert.modifiedAt)}</div>
+            </div>
                 <div class="certificate-actions">
                     <a href="${baseUrl}/www.gso.org.sa/cc/v/${cert.ccrNumber}.html" 
                        target="_blank" 
@@ -593,6 +596,12 @@ async function editCertificate(ccrNumber) {
         $('#ccrNumber').val(data.ccrNumber || '').prop('readonly', true);
         $('#approvedOn').val(data.approvedOn || '');
         $('#manufacturer').val(data.manufacturer || '');
+        if (data.carLogo) {
+            $('#carLogo').val(data.carLogo).trigger('change');
+        } else {
+            $('#carLogo').val('');
+            $('#carLogoPreview').hide();
+        }
         $('#vehicleDescription').val(data.vehicleDescription || '');
         $('#category').val(data.category || 'Passenger Car');
         $('#modelYear').val(data.modelYear || '');
@@ -690,3 +699,29 @@ window.searchCertificate = searchCertificate;
 window.loadCertificateForEdit = loadCertificateForEdit;
 window.editCertificate = editCertificate;
 window.cancelEdit = cancelEdit;
+
+// Load car logos
+async function loadLogos() {
+    try {
+        const response = await fetch(`${API_BASE}/logos`);
+        if (!response.ok) throw new Error('Failed to fetch logos');
+        
+        const logos = await response.json();
+        const select = $('#carLogo');
+        
+        logos.forEach(logo => {
+            select.append(`<option value="${logo}">${logo.replace('_logo', '').replace('.png', '').replace('.jpg', '').replace('.jpeg', '').toUpperCase()}</option>`);
+        });
+        
+        select.on('change', function() {
+            const val = $(this).val();
+            if (val) {
+                $('#carLogoPreview').attr('src', `/logos/${val}`).show();
+            } else {
+                $('#carLogoPreview').hide();
+            }
+        });
+    } catch (error) {
+        console.error('Error loading logos:', error);
+    }
+}

@@ -252,6 +252,7 @@ select.form-control {
   background-repeat: no-repeat;
   background-size: 20px;
   padding-right: 44px;
+  height: 50px;
 }
 
 select.form-control option {
@@ -411,8 +412,8 @@ textarea.form-control {
 
 .certificate-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 14px 16px;
   background: var(--bg-light);
   border-radius: var(--radius-md);
@@ -427,8 +428,8 @@ textarea.form-control {
 }
 
 .certificate-info {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  margin-bottom: 12px;
 }
 
 .certificate-ccr {
@@ -439,16 +440,15 @@ textarea.form-control {
 }
 
 .certificate-car-name {
-  font-weight: 400;
+  font-weight: 500;
   color: var(--text-secondary);
-  font-size: 0.78rem;
-  margin-left: 6px;
-  display: inline-block;
-  max-width: 160px;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  display: block;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
 .search-match-item:hover {
@@ -464,7 +464,9 @@ textarea.form-control {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin-left: 12px;
+  width: 100%;
+  margin-left: 0;
+  justify-content: flex-start;
 }
 
 .certificate-actions .btn {

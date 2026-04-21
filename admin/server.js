@@ -18,6 +18,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // This makes relative paths like ../../../static.gso.org.sa/ work correctly
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// Serve the cars logos folder so frontend can show them
+app.use("/logos", express.static(path.join(__dirname, "cars logos")));
+
 // Path to the certificates folder
 const CERTIFICATES_PATH = path.join(
   __dirname,
@@ -592,6 +595,22 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
+// Endpoint to list available car logos
+app.get("/api/logos", (req, res) => {
+  try {
+    const logosDir = path.join(__dirname, "cars logos");
+    if (!fs.existsSync(logosDir)) {
+      return res.json([]);
+    }
+    const files = fs.readdirSync(logosDir)
+      .filter(file => file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg'))
+      .sort();
+    res.json(files);
+  } catch (error) {
+    console.error("Error reading logos directory:", error);
+    res.status(500).json({ error: "Failed to list logos" });
+  }
+});
 // List all certificates (with vehicleDescription and VIN from JSON for search)
 app.get("/api/certificates", (req, res) => {
   try {
