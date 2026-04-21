@@ -7,12 +7,67 @@ const API_BASE = `${window.location.protocol}//${window.location.hostname}:${win
 let editMode = false;
 let currentEditCcr = null;
 
+// Store all certificates for client-side search
+let allCertificates = [];
+
 // DOM Ready
 $(document).ready(function() {
     loadCertificates();
     setupFormHandler();
     setDefaultValues();
+    setupVinMasking();
+    setupSearchInput();
 });
+
+// Generate a random 6-digit CCR number
+function generateCcrNumber() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Mask VIN: keep first 8 chars, 9th becomes *, keep 10th, last 7 become *
+// Example: LSJA36U38T1234567 -> LSJA36U3*T*******
+function maskVin(vin) {
+    if (!vin || vin.length < 10) return vin;
+    const upper = vin.toUpperCase();
+    const first8 = upper.substring(0, 8);
+    const char10 = upper.charAt(9);
+    return first8 + '*' + char10 + '*'.repeat(Math.max(0, upper.length - 10));
+}
+
+// Setup VIN input masking
+function setupVinMasking() {
+    $('#vinFull').on('input', function() {
+        const raw = $(this).val().toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '');
+        $(this).val(raw);
+        
+        if (raw.length >= 10) {
+            const masked = maskVin(raw);
+            $('#vin').val(masked);
+            $('#vinPreview').text('Masked: ' + masked).show();
+        } else if (raw.length > 0) {
+            $('#vin').val(raw);
+            $('#vinPreview').text('Enter full 17-char VIN for masking').show();
+        } else {
+            $('#vin').val('');
+            $('#vinPreview').hide();
+        }
+    });
+}
+
+// Setup live search
+function setupSearchInput() {
+    let searchTimeout;
+    $('#searchCcr').on('input', function() {
+        clearTimeout(searchTimeout);
+        const query = $(this).val().trim();
+        if (query.length === 0) {
+            $('#searchResults').hide();
+            $('#searchResult').hide();
+            return;
+        }
+        searchTimeout = setTimeout(() => searchCertificate(), 200);
+    });
+}
 
 // Set default values for common fields
 function setDefaultValues() {
@@ -25,6 +80,11 @@ function setDefaultValues() {
     const today = new Date();
     const dateStr = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
     $('#approvedOn').attr('placeholder', dateStr);
+
+    // Auto-generate CCR number
+    if (!editMode) {
+        $('#ccrNumber').val(generateCcrNumber());
+    }
 }
 
 // Setup form submission handler
@@ -116,7 +176,7 @@ function collectFormData() {
         // Classification
         category: $('#category').val(),
         modelYear: $('#modelYear').val() || '',
-        countryOfProduction: $('#countryOfProduction').val().trim().toUpperCase(),
+        countryOfProduction: $('#countryOfProduction').val(),
         productionMonth: $('#productionMonth').val() || '',
         productionYear: $('#productionYear').val() || '',
         vin: $('#vin').val().trim(),
@@ -186,6 +246,9 @@ async function loadCertificates() {
             throw new Error('Invalid response from server');
         }
         
+        // Store for search
+        allCertificates = certificates;
+        
         if (!Array.isArray(certificates) || certificates.length === 0) {
             listContainer.html(`
                 <div class="empty-state">
@@ -199,13 +262,33 @@ async function loadCertificates() {
         
         $('#totalCertificates').text(certificates.length);
         
-        // Get base URL for certificate previews
-        const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}`;
+        renderCertificatesList(certificates.slice(0, 15), listContainer);
         
-        const html = certificates.slice(0, 10).map(cert => `
+    } catch (error) {
+        console.error('Error loading certificates:', error);
+        listContainer.html(`
+            <div class="empty-state">
+                <i class="fa fa-exclamation-triangle"></i>
+                <p>Failed to load certificates<br><small>Make sure the server is running</small></p>
+            </div>
+        `);
+    }
+}
+
+// Render certificates list (reusable for main list and search results)
+function renderCertificatesList(certificates, container) {
+    // Get base URL for certificate previews
+    const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}`;
+    
+    const html = certificates.map(cert => {
+        const carLabel = cert.vehicleDescription 
+            ? `<span class="certificate-car-name">${cert.vehicleDescription}</span>` 
+            : '';
+        
+        return `
             <div class="certificate-item" data-ccr="${cert.ccrNumber}">
                 <div class="certificate-info">
-                    <div class="certificate-ccr">#${cert.ccrNumber}</div>
+                    <div class="certificate-ccr">#${cert.ccrNumber} ${carLabel}</div>
                     <div class="certificate-date">${formatDate(cert.modifiedAt)}</div>
                 </div>
                 <div class="certificate-actions">
@@ -243,19 +326,10 @@ async function loadCertificates() {
                     </button>
                 </div>
             </div>
-        `).join('');
-        
-        listContainer.html(html);
-        
-    } catch (error) {
-        console.error('Error loading certificates:', error);
-        listContainer.html(`
-            <div class="empty-state">
-                <i class="fa fa-exclamation-triangle"></i>
-                <p>Failed to load certificates<br><small>Make sure the server is running</small></p>
-            </div>
-        `);
-    }
+        `;
+    }).join('');
+    
+    container.html(html);
 }
 
 // Delete certificate
@@ -403,37 +477,80 @@ async function deployToFirebase() {
 // Make deployToFirebase globally accessible
 window.deployToFirebase = deployToFirebase;
 
-// Search for a certificate
+// Search for a certificate - supports CCR number, car name, and first 7 VIN digits
 async function searchCertificate() {
-    const ccrNumber = $('#searchCcr').val().trim();
+    const query = $('#searchCcr').val().trim().toUpperCase();
     const searchResult = $('#searchResult');
+    const searchResults = $('#searchResults');
     const searchResultText = $('#searchResultText');
     const loadEditBtn = $('#loadEditBtn');
     
-    if (!ccrNumber) {
-        showToast('Please enter a CCR number', 'error');
+    if (!query) {
+        searchResult.hide();
+        searchResults.hide();
         return;
     }
     
+    // First try exact CCR match via API
     try {
-        const response = await fetch(`${API_BASE}/certificates/${ccrNumber}`);
+        const response = await fetch(`${API_BASE}/certificates/${query}`);
         
         if (response.ok) {
             const data = await response.json();
             searchResult.show();
-            searchResultText.html(`Certificate #${ccrNumber} found!`);
+            searchResultText.html(`Certificate #${query} found!`);
             searchResult.find('.alert').removeClass('alert-danger').addClass('alert-success');
-            loadEditBtn.show().data('ccr', ccrNumber);
-        } else {
-            const error = await response.json();
-            searchResult.show();
-            searchResultText.html(`Certificate #${ccrNumber} not found.`);
-            searchResult.find('.alert').removeClass('alert-success').addClass('alert-danger');
-            loadEditBtn.hide();
+            loadEditBtn.show().data('ccr', query);
+            searchResults.hide();
+            return;
         }
-    } catch (error) {
-        console.error('Error searching certificate:', error);
-        showToast('Error searching certificate', 'error');
+    } catch (e) {
+        // Not an exact CCR match, continue to fuzzy search
+    }
+
+    // Fuzzy search across allCertificates: CCR, vehicle description, VIN (first 7)
+    const matches = allCertificates.filter(cert => {
+        const ccr = (cert.ccrNumber || '').toUpperCase();
+        const desc = (cert.vehicleDescription || '').toUpperCase();
+        const vin = (cert.vin || '').toUpperCase();
+        const vinFirst7 = vin.substring(0, 7);
+        
+        return ccr.includes(query) || 
+               desc.includes(query) || 
+               (query.length >= 3 && vinFirst7.includes(query));
+    });
+    
+    searchResult.hide();
+    
+    if (matches.length > 0) {
+        const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}`;
+        const html = matches.slice(0, 10).map(cert => {
+            const carName = cert.vehicleDescription || 'Unknown vehicle';
+            const vinDisplay = cert.vin ? ` | VIN: ${cert.vin.substring(0, 7)}...` : '';
+            return `
+                <div class="search-match-item" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer;" 
+                     onclick="editCertificate('${cert.ccrNumber}')" 
+                     title="Click to edit">
+                    <div style="font-weight: 600; color: #0066cc;">#${cert.ccrNumber}</div>
+                    <div style="font-size: 12px; color: #555;">${carName}${vinDisplay}</div>
+                </div>
+            `;
+        }).join('');
+        
+        searchResults.html(`
+            <div style="background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div style="padding: 6px 12px; background: #f0f0f0; font-size: 11px; color: #888; border-bottom: 1px solid #ddd;">
+                    ${matches.length} result${matches.length > 1 ? 's' : ''} found
+                </div>
+                ${html}
+            </div>
+        `).show();
+    } else {
+        searchResults.html(`
+            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #856404;">
+                <i class="fa fa-info-circle mr-1"></i> No certificates match "${query}"
+            </div>
+        `).show();
     }
 }
 
@@ -479,10 +596,20 @@ async function editCertificate(ccrNumber) {
         $('#vehicleDescription').val(data.vehicleDescription || '');
         $('#category').val(data.category || 'Passenger Car');
         $('#modelYear').val(data.modelYear || '');
-        $('#countryOfProduction').val(data.countryOfProduction || '');
+        $('#countryOfProduction').val(data.countryOfProduction || 'JAPAN');
         $('#productionMonth').val(data.productionMonth || '');
         $('#productionYear').val(data.productionYear || '');
-        $('#vin').val(data.vin || '');
+        
+        // VIN: show masked value; put full VIN in hidden field
+        const vinValue = data.vin || '';
+        $('#vin').val(vinValue);
+        $('#vinFull').val(vinValue);
+        if (vinValue) {
+            $('#vinPreview').text('Masked VIN: ' + vinValue).show();
+        } else {
+            $('#vinPreview').hide();
+        }
+        
         $('#maxVehicleWeight').val(data.maxVehicleWeight || '');
         $('#curbWeight').val(data.curbWeight || '');
         $('#frontAxleWeight').val(data.frontAxleWeight || '');
@@ -509,7 +636,7 @@ async function editCertificate(ccrNumber) {
         $('#vehicleClass').val(data.vehicleClass || 'Passenger Car');
         $('#fuelEconomy').val(data.fuelEconomy || '');
         $('#fuelEconomyRating').val(data.fuelEconomyRating || 'Excellent');
-        $('#additionalInfo').val(data.additionalInfo || '');
+        $('#additionalInfo').val(data.additionalInfo || 'Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2026 MY-D5, when exporting to those countries.');
         
         // Enable edit mode
         editMode = true;
@@ -522,6 +649,10 @@ async function editCertificate(ccrNumber) {
         $('html, body').animate({
             scrollTop: $('.form-card').offset().top - 100
         }, 500);
+        
+        // Hide search results
+        $('#searchResults').hide();
+        $('#searchResult').hide();
         
         showToast(`Certificate #${ccrNumber} loaded for editing`, 'success');
         
@@ -537,12 +668,20 @@ function cancelEdit() {
     editMode = false;
     currentEditCcr = null;
     $('#vehicleForm')[0].reset();
-    $('#ccrNumber').prop('readonly', false);
+    $('#ccrNumber').prop('readonly', true);
     $('#formTitle').html('<i class="fa fa-plus-circle mr-2"></i>Add New Vehicle Certificate');
     $('#cancelEditBtn').hide();
     $('button[type="submit"]').html('<i class="fa fa-file-code-o mr-2"></i>Generate Certificate');
     $('#searchResult').hide();
+    $('#searchResults').hide();
     $('#searchCcr').val('');
+    $('#vinFull').val('');
+    $('#vin').val('');
+    $('#vinPreview').hide();
+    
+    // Reset additional info to default
+    $('#additionalInfo').val('Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2026 MY-D5, when exporting to those countries.');
+    
     setDefaultValues();
 }
 

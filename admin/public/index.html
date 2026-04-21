@@ -70,13 +70,14 @@
                   <div class="row">
                     <div class="col-md-4">
                       <div class="form-group">
-                        <label for="ccrNumber">CCR Number *</label>
+                        <label for="ccrNumber">CCR Number <small class="text-muted">(auto)</small></label>
                         <input
                           type="text"
                           class="form-control"
                           id="ccrNumber"
                           required
-                          placeholder="e.g. 567628"
+                          readonly
+                          style="background-color: #e9ecef; font-weight: 600;"
                         />
                       </div>
                     </div>
@@ -155,12 +156,28 @@
                         <label for="countryOfProduction"
                           >Country of Production</label
                         >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="countryOfProduction"
-                          placeholder="e.g. CANADA"
-                        />
+                        <select class="form-control" id="countryOfProduction">
+                          <option value="JAPAN">JAPAN</option>
+                          <option value="USA">USA</option>
+                          <option value="CANADA">CANADA</option>
+                          <option value="CHINA">CHINA</option>
+                          <option value="THAILAND">THAILAND</option>
+                          <option value="GERMANY">GERMANY</option>
+                          <option value="SOUTH KOREA">SOUTH KOREA</option>
+                          <option value="INDIA">INDIA</option>
+                          <option value="UK">UK</option>
+                          <option value="MEXICO">MEXICO</option>
+                          <option value="FRANCE">FRANCE</option>
+                          <option value="ITALY">ITALY</option>
+                          <option value="SPAIN">SPAIN</option>
+                          <option value="SWEDEN">SWEDEN</option>
+                          <option value="TURKEY">TURKEY</option>
+                          <option value="BRAZIL">BRAZIL</option>
+                          <option value="CZECH REPUBLIC">CZECH REPUBLIC</option>
+                          <option value="SOUTH AFRICA">SOUTH AFRICA</option>
+                          <option value="INDONESIA">INDONESIA</option>
+                          <option value="MALAYSIA">MALAYSIA</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -191,13 +208,17 @@
                     </div>
                     <div class="col-md-6">
                       <div class="form-group">
-                        <label for="vin">VIN</label>
+                        <label for="vinFull">VIN <small class="text-muted">(full 17 chars — will be masked automatically)</small></label>
                         <input
                           type="text"
                           class="form-control"
-                          id="vin"
-                          placeholder="e.g. 1C6SRFHT..."
+                          id="vinFull"
+                          maxlength="17"
+                          placeholder="e.g. LSJA36U38T1234567"
+                          style="text-transform: uppercase; letter-spacing: 1px; font-family: monospace;"
                         />
+                        <input type="hidden" id="vin" />
+                        <small id="vinPreview" class="form-text text-info" style="font-family: monospace; font-size: 14px; display: none;"></small>
                       </div>
                     </div>
                   </div>
@@ -583,8 +604,7 @@
                       class="form-control"
                       id="additionalInfo"
                       rows="3"
-                      placeholder="Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2025 MY-D3, when exporting to those countries."
-                    ></textarea>
+                    >Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2026 MY-D5, when exporting to those countries.</textarea>
                   </div>
                 </div>
 
@@ -615,7 +635,7 @@
                   type="text"
                   class="form-control"
                   id="searchCcr"
-                  placeholder="Enter CCR Number..."
+                  placeholder="CCR, car name, or VIN (first 7)..."
                   onkeypress="if (event.key === 'Enter') searchCertificate();"
                 />
                 <div class="input-group-append">
@@ -628,6 +648,7 @@
                   </button>
                 </div>
               </div>
+              <div id="searchResults" class="mt-2" style="display:none; max-height: 300px; overflow-y: auto;"></div>
               <div id="searchResult" class="mt-3" style="display: none">
                 <div class="alert alert-info">
                   <strong id="searchResultText"></strong>

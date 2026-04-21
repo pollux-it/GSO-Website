@@ -122,7 +122,10 @@ const translations = {
     'CANADA': 'كندا',
     'BRAZIL': 'البرازيل',
     'SOUTH AFRICA': 'جنوب أفريقيا',
-    'TURKEY': 'تركيا'
+    'TURKEY': 'تركيا',
+    'SOUTH KOREA': 'كوريا الجنوبية',
+    'INDONESIA': 'إندونيسيا',
+    'MALAYSIA': 'ماليزيا'
   }
 };
 
@@ -589,20 +592,35 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
-// List all certificates
+// List all certificates (with vehicleDescription and VIN from JSON for search)
 app.get("/api/certificates", (req, res) => {
   try {
     const files = fs
       .readdirSync(CERTIFICATES_PATH)
-      .filter((file) => file.endsWith(".html") && !file.includes("d6cc") && file !== "546883.html")
+      .filter((file) => file.endsWith(".html") && !file.includes("d6cc") && !file.includes("9ed2") && file !== "546883.html")
       .map((file) => {
         const stats = fs.statSync(path.join(CERTIFICATES_PATH, file));
         const ccrNumber = file.replace(".html", "");
         const arabicExists = fs.existsSync(path.join(CERTIFICATES_PATH, `${ccrNumber}d6cc.html`));
+        
+        // Try to read extra info from JSON
+        let vehicleDescription = '';
+        let vin = '';
+        const jsonPath = path.join(CERTIFICATES_PATH, `${ccrNumber}.json`);
+        if (fs.existsSync(jsonPath)) {
+          try {
+            const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+            vehicleDescription = jsonData.vehicleDescription || '';
+            vin = jsonData.vin || '';
+          } catch (e) { /* ignore parse errors */ }
+        }
+        
         return {
           ccrNumber: ccrNumber,
           filename: file,
           arabicFile: arabicExists ? `${ccrNumber}d6cc.html` : null,
+          vehicleDescription: vehicleDescription,
+          vin: vin,
           createdAt: stats.birthtime,
           modifiedAt: stats.mtime,
         };

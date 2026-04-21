@@ -438,6 +438,23 @@ textarea.form-control {
   margin-bottom: 2px;
 }
 
+.certificate-car-name {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  margin-left: 6px;
+  display: inline-block;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.search-match-item:hover {
+  background: var(--primary-light) !important;
+}
+
 .certificate-date {
   font-size: 0.75rem;
   color: var(--text-muted);
