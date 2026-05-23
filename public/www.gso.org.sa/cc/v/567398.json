@@ -2,7 +2,8 @@
   "ccrNumber": "567398",
   "approvedOn": "20 OCT 2025",
   "manufacturer": "NISSAN MOTOR CO., LTD.",
-  "vehicleDescription": "Nissan Navara D23 2.5L Pick-Up 4x2 4Doors",
+  "carLogo": "",
+  "vehicleDescription": "Nissan Navara D23 2.5L Pick-Up 4x4 4Doors",
   "category": "Truck",
   "modelYear": "2025",
   "countryOfProduction": "SOUTH AFRICA",
@@ -27,7 +28,7 @@
   "airIntake": "Naturally Aspirated",
   "enginePower": "118",
   "engineRpm": "6000",
-  "pollutantLimit": "Euro 5",
+  "pollutantLimit": "Euro 4",
   "transmission": "Manual",
   "eCallSystem": "Provided",
   "serviceBrakes": "Hydraulic",
@@ -35,5 +36,5 @@
   "vehicleClass": "Light Truck",
   "fuelEconomy": "12.3",
   "fuelEconomyRating": "Good",
-  "additionalInfo": "Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2026 MY-D5, when exporting to those countries."
+  "additionalInfo": "Also comply with the National regulations for member countries mentioned in the Annex of the list of Technical Regulations for MV 2025 MY-D5, when exporting to those countries."
 }
